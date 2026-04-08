@@ -51,12 +51,20 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+          <a href="/" className="text-xl font-bold text-gray-900 tracking-tight hover:opacity-80 transition-opacity">
             <span className="text-indigo-600">Real</span>Memo
-          </h1>
-          <span className="text-xs text-gray-400">
-            텍스트를 진짜 메모로
-          </span>
+          </a>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-400">
+              텍스트를 진짜 메모로
+            </span>
+            <a
+              href="/demo"
+              className="rounded-md bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition-colors"
+            >
+              위젯 데모
+            </a>
+          </div>
         </div>
       </header>
 

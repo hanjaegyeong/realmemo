@@ -57,6 +57,10 @@ API(`/api/transform`)는 GPT-4o-mini에게 아래 JSON 구조를 요청한다:
 - **checklist**: `{ items: string[] }`
 - **summary_card**: `{ items: { label: string, value: string }[] }`
 
+## 문서 동기화
+
+- 위젯 타입이 추가/변경/삭제되면 `src/app/demo/page.tsx`의 `DEMO_WIDGETS` 배열을 반드시 함께 갱신한다.
+
 ## 코딩 컨벤션
 
 - 한국어 UI, 영어 코드
