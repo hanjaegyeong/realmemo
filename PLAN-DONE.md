@@ -37,3 +37,14 @@
 - [x] 프로젝트 루트에 저장 (WIDGETS.md)
 
 추가 작업: WIDGETS.md → `/demo` 데모 페이지로 전환 (실제 렌더링 확인 가능), 홈 헤더에 데모 링크 추가, 타이틀 홈 링크화, CLAUDE.md에 위젯 변경 시 데모 자동 갱신 규칙 추가
+
+---
+
+## 배포 (2026-04-09 완료)
+
+- [x] 배포 플랫폼 결정 (GitHub Pages → Vercel로 전환)
+- [x] Vercel 배포 및 환경변수 설정
+- [x] 배포 동작 확인
+
+배포 URL: https://realmemo-dug7r7n4f-hanjaegyeongs-projects.vercel.app/
+비고: GitHub Pages는 정적 호스팅이라 API route 불가 → Vercel로 전환

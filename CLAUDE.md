@@ -14,7 +14,7 @@
 - **AI API**: Anthropic Claude Haiku 4.5
 - **마크다운 렌더링**: react-markdown + remark-gfm
 - **다이어그램**: Mermaid.js
-- **배포**: 미정 (Vercel 예정)
+- **배포**: Vercel (https://realmemo-dug7r7n4f-hanjaegyeongs-projects.vercel.app/)
 
 ## 프로젝트 구조
 
