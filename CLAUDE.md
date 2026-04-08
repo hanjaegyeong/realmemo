@@ -6,13 +6,12 @@
 
 날것의 텍스트(회의록, 아이디어, 강의 노트, 기획안 등)를 **구조화된 문서 + 시각화**로 자동 변환.
 - 마크다운: 헤딩, 리스트, 테이블 등으로 내용을 논리적으로 재구성
-- 다이어그램: 프로세스, 관계, 구조를 Mermaid.js로 도식화
 - 위젯: 테이블, 타임라인, 체크리스트, 요약카드로 인터랙티브 표현
 
 ## 기술 스택
 
 - **프론트엔드**: Next.js 16 (App Router) + TypeScript + Tailwind CSS
-- **AI API**: OpenAI GPT-4o-mini (JSON 모드)
+- **AI API**: Anthropic Claude Haiku 4.5
 - **마크다운 렌더링**: react-markdown + remark-gfm
 - **다이어그램**: Mermaid.js
 - **배포**: 미정 (Vercel 예정)
@@ -62,7 +61,7 @@ API(`/api/transform`)는 GPT-4o-mini에게 아래 JSON 구조를 요청한다:
 
 - 한국어 UI, 영어 코드
 - Client Component에는 반드시 `"use client"` 선언
-- API 키는 서버 사이드에서만 사용 (환경변수 `OPENAI_API_KEY`)
+- API 키는 서버 사이드에서만 사용 (환경변수 `ANTHROPIC_API_KEY`)
 - Tailwind CSS로 스타일링, 인라인 스타일 금지
 - 컬러 테마: indigo 계열 primary
 
