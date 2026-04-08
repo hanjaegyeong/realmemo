@@ -48,3 +48,16 @@
 
 배포 URL: https://realmemo-dug7r7n4f-hanjaegyeongs-projects.vercel.app/
 비고: GitHub Pages는 정적 호스팅이라 API route 불가 → Vercel로 전환
+
+---
+
+## 변환 히스토리 저장 및 다시 보기 (2026-04-09 완료)
+
+- [x] localStorage 히스토리 스키마 설계 (id, 원본텍스트, 변환결과, 생성일시)
+- [x] 변환 성공 시 결과를 localStorage에 자동 저장하는 로직 추가
+- [x] 히스토리 목록 UI 구현 (메인 페이지 사이드 또는 별도 영역)
+- [x] 히스토리 항목 클릭 시 과거 결과 다시 보기
+- [x] 히스토리 개별 삭제 및 전체 삭제 기능
+- [x] localStorage 용량 한도 처리 (오래된 항목 자동 정리 또는 경고)
+
+추가: 개별 삭제 제거, 전체 삭제만 유지 (사용자 요청)
