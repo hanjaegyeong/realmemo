@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
 }
 
 @theme inline {
@@ -12,15 +13,82 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 마크다운 렌더링 강화 */
+.prose {
+  color: #000 !important;
+}
+
+.prose h1 {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  color: #000 !important;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose h2 {
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  color: #1e1b4b !important;
+  margin-top: 2rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.prose h3 {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: #312e81 !important;
+}
+
+.prose p,
+.prose li,
+.prose td,
+.prose th {
+  color: #000 !important;
+}
+
+.prose strong {
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.prose th {
+  background-color: #eef2ff !important;
+  font-weight: 700 !important;
+  border: 1px solid #c7d2fe !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.prose td {
+  border: 1px solid #e5e7eb !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.prose tr:hover td {
+  background-color: #f8fafc;
+}
+
+.prose ul {
+  list-style-type: disc !important;
+}
+
+.prose ol {
+  list-style-type: decimal !important;
+}
+
+.prose a {
+  color: #4f46e5 !important;
+  text-decoration: underline;
 }
