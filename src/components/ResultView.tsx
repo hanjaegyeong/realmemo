@@ -6,8 +6,9 @@ import WidgetRenderer from "./Widgets";
 
 interface TransformResult {
   markdown: string;
+  diagrams?: string[];
   widgets?: Array<{
-    type: "table" | "timeline" | "checklist" | "summary_card";
+    type: string;
     title: string;
     data: Record<string, unknown>;
   }>;
