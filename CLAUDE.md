@@ -22,14 +22,22 @@
 src/
 ├── app/
 │   ├── layout.tsx          — 루트 레이아웃
-│   ├── page.tsx            — 메인 페이지 (입력 + 결과)
-│   ├── globals.css         — 글로벌 스타일
+│   ├── page.tsx            — 메인 페이지 (사이드바 + 입력/결과)
+│   ├── globals.css         — 글로벌 스타일 (Notion 감성)
+│   ├── workspaces/
+│   │   └── page.tsx        — ���크스페이스 관리 페이지 (카드형 그리드)
+│   ├── demo/
+│   │   └── page.tsx        — 위젯 데모 페이지
 │   └── api/transform/
 │       └── route.ts        — AI 변환 API 엔드포인트
-└── components/
-    ├── ResultView.tsx      — 마크다운 + 다이어그램 + 위젯 통합 렌더러
-    ├── MermaidDiagram.tsx  — Mermaid.js 다이어그램 컴포넌트
-    └── Widgets.tsx         — 인터랙티브 위젯 (테이블/타임라인/체크리스트/요약카드)
+├── components/
+│   ├── ResultView.tsx      — 마크���운 + 위젯 통합 렌��러
+│   ├── Sidebar.tsx         — 사이드바 (워크스페이스 전환 + 폴더 트리)
+│   ├── WorkspaceSelector.tsx — ��크스페이스 드롭다운 팝오버
+│   ├── Widgets.tsx         ��� 인터랙티브 위젯 (20종)
+│   └── MermaidDiagram.tsx  — Mermaid.js 다이어���램 컴포넌트
+└── lib/
+    └── store.ts            — localStorage 기반 데이터 레이어 (Workspace/Folder/Document CRUD)
 ```
 
 ## AI 응답 스키마
