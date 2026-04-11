@@ -61,3 +61,34 @@
 - [x] localStorage 용량 한도 처리 (오래된 항목 자동 정리 또는 경고)
 
 추가: 개별 삭제 제거, 전체 삭제만 유지 (사용자 요청)
+
+---
+
+## 더 다양한 위젯 타입 (차트, 마인드맵, 칸반보드 등) 제공 (2026-04-11 완료)
+
+- [x] 새 위젯 타입별 data 스키마 설계 (chart, mindmap, kanban, progress, quote, pros_cons, accordion, link_list, gallery, rating)
+- [x] chart 위젯 컴포넌트 구현 (bar/pie/line 서브타입, 순수 SVG)
+- [x] mindmap 위젯 컴포넌트 구현 (트리 구조, 접기/펼치기)
+- [x] kanban 위젯 컴포넌트 구현 (컬럼별 카드 레이아웃)
+- [x] progress 위젯 컴포넌트 구현 (진행률 바, 색상 단계)
+- [x] quote 위젯 컴포넌트 구현 (인용문 카드, 스타일별 색상)
+- [x] pros_cons 위젯 컴포넌트 구현 (장단점 2단 비교)
+- [x] accordion 위젯 컴포넌트 구현 (접기/펼치기 섹션)
+- [x] link_list 위젯 컴포넌트 구현 (북마크 카드)
+- [x] gallery 위젯 컴포넌트 구현 (카드 그리드)
+- [x] rating 위젯 컴포넌트 구현 (별점 표시)
+- [x] Widgets.tsx 타입 정의 및 WidgetRenderer에 새 위젯 통합
+- [x] AI 프롬프트(route.ts) 업데이트 — 새 위젯 스키마·사용 조건 추가
+- [x] 데모 페이지(demo/page.tsx) DEMO_WIDGETS에 새 위젯 예시 추가
+- [x] CLAUDE.md 위젯 타입별 data 구조 섹션 갱신
+
+### 진행 로그
+| 시간 | 작업 내용 |
+|------|----------|
+| 2026-04-10 | 10종 위젯 스키마 설계 완료 |
+| 2026-04-10 | Widgets.tsx — 10개 새 컴포넌트 구현 (chart, mindmap, kanban, progress, quote, pros_cons, accordion, link_list, gallery, rating) |
+| 2026-04-10 | route.ts — AI 프롬프트에 14종 위젯 스키마·사용 조건·제약사항 추가 |
+| 2026-04-10 | demo/page.tsx — 10개 새 위젯 데모 데이터 추가 |
+| 2026-04-10 | CLAUDE.md — 위젯 타입 문서 갱신 |
+| 2026-04-10 | 빌드 검증 통과 (npm run build 성공) |
+| 2026-04-11 | 위젯 디자인·비율 전면 수정 (컨테이너 w-full, bar chart 그룹 레이아웃, timeline flex 정렬, metric/summary 그리드, rating 간소화) |
