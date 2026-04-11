@@ -42,7 +42,7 @@ API(`/api/transform`)는 GPT-4o-mini에게 아래 JSON 구조를 요청한다:
   "diagrams": ["Mermaid.js 코드 배열"],
   "widgets": [
     {
-      "type": "table | timeline | checklist | summary_card",
+      "type": "table | timeline | checklist | summary_card | chart | mindmap | radial_map | kanban | progress | quote | pros_cons | accordion | link_list | gallery | rating | process | metric | swot | comparison | poll",
       "title": "위젯 제목",
       "data": {}
     }
@@ -56,6 +56,22 @@ API(`/api/transform`)는 GPT-4o-mini에게 아래 JSON 구조를 요청한다:
 - **timeline**: `{ items: { date: string, event: string }[] }`
 - **checklist**: `{ items: string[] }`
 - **summary_card**: `{ items: { label: string, value: string }[] }`
+- **chart**: `{ chart_type: "bar" | "pie" | "line", labels: string[], datasets: { name: string, values: number[] }[] }`
+- **mindmap**: `{ root: string, children: { label: string, children?: ... }[] }` (트리 구조도)
+- **radial_map**: `{ root: string, children: { label: string, children?: ... }[] }` (방사형 마인드맵)
+- **kanban**: `{ columns: { title: string, cards: string[] }[] }`
+- **progress**: `{ items: { label: string, value: number, max?: number }[] }`
+- **quote**: `{ text: string, author?: string, style?: "info" | "warning" | "success" }`
+- **pros_cons**: `{ pros: string[], cons: string[] }`
+- **accordion**: `{ items: { title: string, content: string }[] }`
+- **link_list**: `{ items: { title: string, url: string, description?: string }[] }`
+- **gallery**: `{ items: { title: string, description: string, tag?: string }[] }`
+- **rating**: `{ items: { label: string, score: number, max?: number }[] }`
+- **process**: `{ steps: { label: string, description?: string }[] }`
+- **metric**: `{ items: { label: string, value: string, delta?: string, trend?: "up" | "down" | "neutral" }[] }`
+- **swot**: `{ strengths: string[], weaknesses: string[], opportunities: string[], threats: string[] }`
+- **comparison**: `{ columns: string[], features: { name: string, values: (boolean | string)[] }[] }`
+- **poll**: `{ items: { label: string, votes: number }[] }`
 
 ## 문서 동기화
 
