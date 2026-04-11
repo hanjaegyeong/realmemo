@@ -16,9 +16,9 @@ interface TransformResult {
 
 export default function ResultView({ result }: { result: TransformResult }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Markdown */}
-      <div className="prose prose-indigo max-w-none prose-headings:text-black prose-p:text-black prose-strong:text-black prose-li:text-black prose-a:text-indigo-600 prose-td:text-black prose-th:text-black">
+      <div className="prose max-w-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {result.markdown}
         </ReactMarkdown>
@@ -26,11 +26,11 @@ export default function ResultView({ result }: { result: TransformResult }) {
 
       {/* Widgets */}
       {result.widgets && result.widgets.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <span className="h-6 w-1 bg-indigo-500 rounded-full" />
-            인터랙티브 요약
-          </h2>
+        <div className="space-y-5">
+          <div className="flex items-center gap-2.5">
+            <div className="h-5 w-0.5 bg-gray-900 rounded-full" />
+            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">인터랙티브 요약</h2>
+          </div>
           <WidgetRenderer widgets={result.widgets as never} />
         </div>
       )}

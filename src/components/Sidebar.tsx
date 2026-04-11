@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { FolderTreeNode, MemoDocument, Folder } from "@/lib/store";
+import type { FolderTreeNode, MemoDocument, Folder, Workspace } from "@/lib/store";
+import WorkspaceSelector from "./WorkspaceSelector";
 
 export interface SidebarProps {
   tree: FolderTreeNode[];
@@ -21,6 +22,35 @@ export interface SidebarProps {
   onDeleteDocument: (id: string) => void;
   onMoveDocument: (docId: string, folderId: string | null) => void;
   onMoveFolder: (folderId: string, newParentId: string | null) => void;
+  // Workspace props
+  workspaces: Workspace[];
+  activeWorkspaceId: string | null;
+  onSelectWorkspace: (ws: Workspace) => void;
+  onCreateWorkspace: (name: string, emoji: string, color: string) => void;
+  onDeleteWorkspace: (id: string) => void;
+  onUpdateWorkspace: (id: string, updates: { name?: string; emoji?: string; color?: string }) => void;
+}
+
+// ─── Color map (shared with WorkspaceSelector) ─────────────────────────────
+
+const WS_COLOR_MAP: Record<string, { bgLight: string; text: string }> = {
+  gray:    { bgLight: "bg-gray-100",    text: "text-gray-600" },
+  indigo:  { bgLight: "bg-indigo-100",  text: "text-indigo-600" },
+  rose:    { bgLight: "bg-rose-100",    text: "text-rose-600" },
+  emerald: { bgLight: "bg-emerald-100", text: "text-emerald-600" },
+  amber:   { bgLight: "bg-amber-100",   text: "text-amber-600" },
+  violet:  { bgLight: "bg-violet-100",  text: "text-violet-600" },
+  cyan:    { bgLight: "bg-cyan-100",    text: "text-cyan-600" },
+};
+
+function WorkspaceInitial({ name, color }: { name: string; color: string }) {
+  const c = WS_COLOR_MAP[color] ?? WS_COLOR_MAP.gray;
+  const initial = name.charAt(0).toUpperCase() || "W";
+  return (
+    <span className={`w-5 h-5 ${c.bgLight} ${c.text} rounded-md flex items-center justify-center text-[11px] font-semibold flex-shrink-0 select-none`}>
+      {initial}
+    </span>
+  );
 }
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -28,7 +58,7 @@ export interface SidebarProps {
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
-      className={`w-3 h-3 text-gray-400 transition-transform duration-150 ${open ? "rotate-90" : ""}`}
+      className={`w-3 h-3 text-gray-400 transition-transform duration-150 flex-shrink-0 ${open ? "rotate-90" : ""}`}
       viewBox="0 0 20 20"
       fill="currentColor"
     >
@@ -37,9 +67,17 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
+function SwitcherChevronIcon() {
+  return (
+    <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
 function FolderIcon() {
   return (
-    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="w-[15px] h-[15px] text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
     </svg>
   );
@@ -47,7 +85,7 @@ function FolderIcon() {
 
 function DocIcon() {
   return (
-    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="w-[15px] h-[15px] text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
     </svg>
   );
@@ -65,7 +103,7 @@ function DotsIcon() {
 
 function PlusIcon() {
   return (
-    <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="w-[15px] h-[15px] text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
     </svg>
   );
@@ -109,7 +147,7 @@ function InlineInput({
         if (e.key === "Escape") { e.preventDefault(); onCancel(); }
       }}
       placeholder={placeholder}
-      className="flex-1 min-w-0 rounded px-1.5 py-0.5 text-sm border border-indigo-400 outline-none bg-white text-gray-900"
+      className="flex-1 min-w-0 rounded-md px-1.5 py-0.5 text-[13px] border border-indigo-400 outline-none bg-white text-gray-900 focus:ring-1 focus:ring-indigo-200"
       onClick={(e) => e.stopPropagation()}
     />
   );
@@ -128,14 +166,14 @@ function ContextMenu({ items, onClose }: { items: MenuEntry[]; onClose: () => vo
 
   return (
     <div
-      className="absolute right-0 top-full mt-1 z-50 w-44 rounded-lg border border-gray-200 bg-white shadow-lg py-1 text-sm"
+      className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl bg-white py-1.5 text-[13px] shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_3px_6px_rgba(0,0,0,0.04),0_9px_24px_rgba(0,0,0,0.06)]"
       onClick={(e) => e.stopPropagation()}
     >
       {items.map((item, i) =>
         isSubmenu(item) ? (
           <div key={i}>
             <button
-              className="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-gray-50 flex items-center justify-between"
+              className="w-full text-left px-3 py-1.5 text-gray-700 hover:bg-black/[0.03] flex items-center justify-between transition-colors"
               onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
             >
               {item.label}
@@ -144,11 +182,11 @@ function ContextMenu({ items, onClose }: { items: MenuEntry[]; onClose: () => vo
               </svg>
             </button>
             {openSub === item.label && (
-              <div className="border-t border-gray-100 bg-gray-50 py-1 max-h-48 overflow-y-auto">
+              <div className="border-t border-black/[0.04] bg-black/[0.02] py-1 max-h-48 overflow-y-auto">
                 {item.submenu.map((sub, j) => (
                   <button
                     key={j}
-                    className="w-full text-left px-4 py-1.5 text-xs text-gray-600 hover:bg-gray-100"
+                    className="w-full text-left px-4 py-1.5 text-[12px] text-gray-600 hover:bg-black/[0.03] transition-colors"
                     onClick={() => { sub.onClick(); onClose(); }}
                   >
                     {sub.label}
@@ -160,7 +198,7 @@ function ContextMenu({ items, onClose }: { items: MenuEntry[]; onClose: () => vo
         ) : (
           <button
             key={i}
-            className={`w-full text-left px-3 py-1.5 hover:bg-gray-50 ${item.danger ? "text-red-600" : "text-gray-700"}`}
+            className={`w-full text-left px-3 py-1.5 hover:bg-black/[0.03] transition-colors ${item.danger ? "text-red-500" : "text-gray-700"}`}
             onClick={() => { item.onClick(); onClose(); }}
           >
             {item.label}
@@ -228,8 +266,10 @@ function DocRow({
     <div
       draggable={!isRenaming}
       onDragStart={(e) => startDocDrag(e, doc.id)}
-      className={`group flex items-center gap-1.5 pr-2 py-1 rounded-md cursor-pointer text-sm transition-colors relative ${
-        selected ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-100"
+      className={`group flex items-center gap-1.5 pr-1.5 py-[5px] rounded-md cursor-pointer transition-colors relative ${
+        selected
+          ? "bg-indigo-500/[0.08] text-indigo-700"
+          : "text-gray-600 hover:bg-black/[0.04]"
       }`}
       style={{ paddingLeft: `${depth * 16 + 8}px` }}
       onClick={onSelect}
@@ -238,10 +278,10 @@ function DocRow({
       {isRenaming ? (
         <InlineInput defaultValue={doc.title} onSubmit={onRename} onCancel={onCancelRename} />
       ) : (
-        <span className="flex-1 min-w-0 truncate">{doc.title}</span>
+        <span className="flex-1 min-w-0 truncate text-[13px]">{doc.title}</span>
       )}
       <button
-        className={`flex-shrink-0 p-0.5 rounded hover:bg-gray-200 transition-opacity ${
+        className={`flex-shrink-0 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-black/[0.06] transition-all ${
           isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
         onClick={(e) => { e.stopPropagation(); onOpenMenu(); }}
@@ -292,10 +332,10 @@ function FolderRow({
   const isRenaming = renamingId === `folder-${fid}`;
   const showNewSubfolder = newSubfolderParentId === fid;
 
-  // Auto-expand when subfolder creation or new memo triggers
   useEffect(() => {
     if (showNewSubfolder) setOpen(true);
   }, [showNewSubfolder]);
+
   const hasChildren = node.children.length > 0 || node.documents.length > 0 || showNewSubfolder;
 
   const menuItems: MenuEntry[] = [
@@ -320,16 +360,9 @@ function FolderRow({
     e.preventDefault();
     setDragOver(false);
     const docId = getDragDocId(e);
-    if (docId) {
-      onMoveDocument(docId, fid);
-      setOpen(true);
-      return;
-    }
+    if (docId) { onMoveDocument(docId, fid); setOpen(true); return; }
     const draggedFolderId = getDragFolderId(e);
-    if (draggedFolderId && draggedFolderId !== fid) {
-      onMoveFolder(draggedFolderId, fid);
-      setOpen(true);
-    }
+    if (draggedFolderId && draggedFolderId !== fid) { onMoveFolder(draggedFolderId, fid); setOpen(true); }
   }
 
   return (
@@ -338,12 +371,12 @@ function FolderRow({
       <div
         draggable={!isRenaming}
         onDragStart={(e) => { e.stopPropagation(); startFolderDrag(e, fid); }}
-        className={`group flex items-center gap-1.5 pr-2 py-1 rounded-md cursor-pointer text-sm transition-colors relative ${
+        className={`group flex items-center gap-1.5 pr-1.5 py-[5px] rounded-md cursor-pointer transition-colors relative ${
           dragOver
-            ? "bg-indigo-100 ring-1 ring-indigo-300"
+            ? "bg-indigo-500/[0.08] ring-1 ring-indigo-300"
             : isSelected
-              ? "bg-indigo-50 text-indigo-700"
-              : "text-gray-700 hover:bg-gray-100"
+              ? "bg-indigo-500/[0.08] text-indigo-700"
+              : "text-gray-700 hover:bg-black/[0.04]"
         }`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={() => { setOpen((v) => !v); onSelectFolder(fid); }}
@@ -360,10 +393,10 @@ function FolderRow({
             onCancel={onCancelRename}
           />
         ) : (
-          <span className="flex-1 min-w-0 truncate font-medium">{node.folder.name}</span>
+          <span className="flex-1 min-w-0 truncate text-[13px] font-medium">{node.folder.name}</span>
         )}
         <button
-          className={`flex-shrink-0 p-0.5 rounded hover:bg-gray-200 transition-opacity ${
+          className={`flex-shrink-0 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-black/[0.06] transition-all ${
             isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
           onClick={(e) => { e.stopPropagation(); onSetActiveMenu(isMenuOpen ? null : `folder-${fid}`); }}
@@ -377,7 +410,7 @@ function FolderRow({
       {open && hasChildren && (
         <div>
           {showNewSubfolder && (
-            <div className="flex items-center gap-1.5 pr-2 py-1" style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}>
+            <div className="flex items-center gap-1.5 pr-1.5 py-[5px]" style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}>
               <FolderIcon />
               <InlineInput
                 placeholder="폴더 이름"
@@ -434,6 +467,8 @@ export default function Sidebar({
   onSelectDocument, onSelectFolder, onNewMemo, onNewMemoInFolder,
   onCreateFolder, onRenameFolder, onDeleteFolder,
   onRenameDocument, onDeleteDocument, onMoveDocument, onMoveFolder,
+  workspaces, activeWorkspaceId,
+  onSelectWorkspace, onCreateWorkspace, onDeleteWorkspace, onUpdateWorkspace,
 }: SidebarProps) {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -441,6 +476,12 @@ export default function Sidebar({
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [rootDragOver, setRootDragOver] = useState(false);
+  const [wsPopoverOpen, setWsPopoverOpen] = useState(false);
+
+  // Derive current workspace info
+  const currentWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
+  const currentWorkspaceName = currentWorkspace?.name ?? "워크스페이스";
+  const currentWorkspaceColor = currentWorkspace?.color ?? "gray";
 
   // Auto-rename new memo
   useEffect(() => {
@@ -451,7 +492,7 @@ export default function Sidebar({
     return [n.folder, ...n.children.flatMap(flatten)];
   });
 
-  // ─── Rename handlers ────────────────────────────────────────────────
+  // ─── Rename handlers ────────────────────────────────────────
 
   function handleStartRename(id: string) {
     setRenamingId(id);
@@ -474,7 +515,7 @@ export default function Sidebar({
     setRenamingId(null);
   }
 
-  // ─── Subfolder handlers ─────────────────────────────────────────────
+  // ─── Subfolder handlers ─────────────────────────────────────
 
   function handleStartNewSubfolder(parentId: string) {
     setNewSubfolderParentId(parentId);
@@ -486,7 +527,7 @@ export default function Sidebar({
     setNewSubfolderParentId(null);
   }
 
-  // ─── Delete handlers (with confirmation) ────────────────────────────
+  // ─── Delete handlers (with confirmation) ────────────────────
 
   function handleDeleteFolder(id: string) {
     setActiveMenuId(null);
@@ -500,14 +541,14 @@ export default function Sidebar({
     onDeleteDocument(id);
   }
 
-  // ─── New memo in folder ─────────────────────────────────────────────
+  // ─── New memo in folder ─────────────────────────────────────
 
   function handleNewMemoInFolder(folderId: string) {
     setActiveMenuId(null);
     onNewMemoInFolder(folderId);
   }
 
-  // ─── Root folder creation ───────────────────────────────────────────
+  // ─── Root folder creation ───────────────────────────────────
 
   function handleCreateRootFolder() {
     const name = newFolderName.trim();
@@ -517,7 +558,7 @@ export default function Sidebar({
     setShowNewFolder(false);
   }
 
-  // ─── Root drop zone ─────────────────────────────────────────────────
+  // ─── Root drop zone ─────────────────────────────────────────
 
   function handleRootDragOver(e: React.DragEvent) {
     if (!canDrop(e)) return;
@@ -536,37 +577,57 @@ export default function Sidebar({
   }
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-gray-50 border-r border-gray-200 flex flex-col h-full relative">
-      {/* Click-outside overlay */}
+    <aside className="w-[260px] flex-shrink-0 bg-[#f7f7f5] border-r border-black/[0.06] flex flex-col h-full relative">
+      {/* Click-outside overlay for context menus */}
       {activeMenuId && (
         <div className="fixed inset-0 z-40" onClick={() => setActiveMenuId(null)} />
       )}
 
-      {/* Logo */}
-      <div className="px-4 py-4 border-b border-gray-200 relative z-50">
-        <a href="/" className="text-lg font-bold text-gray-900 tracking-tight hover:opacity-80 transition-opacity">
-          <span className="text-indigo-600">Real</span>Memo
-        </a>
+      {/* ── Workspace Switcher ── */}
+      <div className="px-3 pt-3 pb-1.5 relative z-[60]">
+        <button
+          onClick={() => setWsPopoverOpen((v) => !v)}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-black/[0.04] transition-all duration-150"
+        >
+          <WorkspaceInitial name={currentWorkspaceName} color={currentWorkspaceColor} />
+          <span className="flex-1 text-left text-[13px] font-semibold text-gray-900 truncate">
+            {currentWorkspaceName}
+          </span>
+          <SwitcherChevronIcon />
+        </button>
+
+        {wsPopoverOpen && (
+          <WorkspaceSelector
+            workspaces={workspaces}
+            activeWorkspaceId={activeWorkspaceId}
+            onSelect={onSelectWorkspace}
+            onCreate={onCreateWorkspace}
+            onDelete={onDeleteWorkspace}
+            onUpdate={onUpdateWorkspace}
+            onClose={() => setWsPopoverOpen(false)}
+          />
+        )}
       </div>
 
-      {/* Actions */}
-      <div className="px-3 py-3 flex flex-col gap-1.5 border-b border-gray-200 relative z-50">
+      {/* ── Action Buttons ── */}
+      <div className="px-3 py-1 relative z-50">
         <button
           onClick={onNewMemo}
-          className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
+          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[13px] text-gray-600 hover:bg-black/[0.04] transition-colors"
         >
           <PlusIcon />
-          <span>새 메모</span>
+          새 메모
         </button>
         <button
           onClick={() => setShowNewFolder((v) => !v)}
-          className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-600 text-sm hover:bg-gray-100 transition-colors border border-gray-200"
+          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[13px] text-gray-600 hover:bg-black/[0.04] transition-colors"
         >
           <FolderIcon />
-          <span>새 폴더</span>
+          새 폴더
         </button>
+
         {showNewFolder && (
-          <div className="flex gap-1.5 mt-1">
+          <div className="flex gap-1.5 mt-1 px-0.5">
             <input
               autoFocus
               value={newFolderName}
@@ -577,11 +638,11 @@ export default function Sidebar({
               }}
               onBlur={() => { if (!newFolderName.trim()) setShowNewFolder(false); }}
               placeholder="폴더 이름"
-              className="flex-1 min-w-0 rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200"
+              className="flex-1 min-w-0 rounded-md border border-black/[0.1] bg-white px-2 py-1 text-[12px] outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200 placeholder:text-gray-400"
             />
             <button
               onClick={handleCreateRootFolder}
-              className="rounded-md bg-indigo-600 px-2.5 py-1 text-xs text-white hover:bg-indigo-700 flex-shrink-0"
+              className="rounded-md bg-indigo-600 px-2.5 py-1 text-[11px] text-white hover:bg-indigo-700 flex-shrink-0 transition-colors"
             >
               확인
             </button>
@@ -589,8 +650,8 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Tree */}
-      <nav className="flex-1 overflow-y-auto py-2 space-y-0.5 relative z-50">
+      {/* ── Tree ── */}
+      <nav className="flex-1 overflow-y-auto px-2 pt-1 pb-2 space-y-px relative z-50">
         {tree.map((node) => (
           <FolderRow
             key={node.folder.id} node={node} depth={0}
@@ -612,14 +673,14 @@ export default function Sidebar({
 
         {/* Root drop zone (미분류) */}
         <div
-          className={`mt-2 pt-2 border-t border-gray-200 min-h-[40px] rounded-b-md transition-colors ${
-            rootDragOver ? "bg-indigo-50 ring-1 ring-indigo-300" : ""
+          className={`mt-2 pt-2 border-t border-black/[0.06] min-h-[40px] rounded-b-md transition-colors ${
+            rootDragOver ? "bg-indigo-500/[0.05] ring-1 ring-indigo-300" : ""
           }`}
           onDragOver={handleRootDragOver}
           onDragLeave={() => setRootDragOver(false)}
           onDrop={handleRootDrop}
         >
-          <p className="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
+          <p className="px-2.5 py-1 text-[11px] font-medium text-gray-400 uppercase tracking-widest">
             미분류
           </p>
           {rootDocuments.map((doc) => (
@@ -639,8 +700,8 @@ export default function Sidebar({
             />
           ))}
           {rootDocuments.length === 0 && !tree.length && (
-            <p className="px-3 py-4 text-xs text-gray-400 text-center">
-              아직 메모가 없습니다.
+            <p className="px-2.5 py-4 text-[12px] text-gray-400 text-center">
+              아직 메모가 없습니다
             </p>
           )}
         </div>

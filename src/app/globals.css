@@ -3,7 +3,10 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #000000;
+  --foreground: #1a1a1a;
+  --sidebar-bg: #f7f7f5;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --hover-bg: rgba(0, 0, 0, 0.04);
 }
 
 @theme inline {
@@ -16,68 +19,96 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 마크다운 렌더링 강화 */
+/* 스크롤바 커스텀 (Notion 스타일) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* 마크다운 렌더링 — Notion 감성 */
 .prose {
-  color: #000 !important;
+  color: #1a1a1a !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
 }
 
 .prose h1 {
-  font-size: 1.75rem !important;
-  font-weight: 800 !important;
-  color: #000 !important;
-  border-bottom: 2px solid #e5e7eb;
+  font-size: 1.625rem !important;
+  font-weight: 700 !important;
+  color: #1a1a1a !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem !important;
+  margin-bottom: 1.25rem !important;
+  letter-spacing: -0.01em;
 }
 
 .prose h2 {
-  font-size: 1.35rem !important;
-  font-weight: 700 !important;
-  color: #1e1b4b !important;
-  margin-top: 2rem !important;
-  margin-bottom: 0.75rem !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 0.625rem !important;
+  letter-spacing: -0.01em;
 }
 
 .prose h3 {
-  font-size: 1.1rem !important;
+  font-size: 1.05rem !important;
   font-weight: 600 !important;
-  color: #312e81 !important;
+  color: #37352f !important;
 }
 
 .prose p,
 .prose li,
 .prose td,
 .prose th {
-  color: #000 !important;
+  color: #37352f !important;
 }
 
 .prose strong {
-  color: #000 !important;
-  font-weight: 700 !important;
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
 }
 
 .prose table {
   border-collapse: collapse;
   width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .prose th {
-  background-color: #eef2ff !important;
-  font-weight: 700 !important;
-  border: 1px solid #c7d2fe !important;
+  background-color: #f7f7f5 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   padding: 0.5rem 0.75rem !important;
+  color: #6b7280 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .prose td {
-  border: 1px solid #e5e7eb !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
   padding: 0.5rem 0.75rem !important;
+  font-size: 14px !important;
 }
 
 .prose tr:hover td {
-  background-color: #f8fafc;
+  background-color: rgba(0, 0, 0, 0.01);
 }
 
 .prose ul {
@@ -89,6 +120,37 @@ body {
 }
 
 .prose a {
-  color: #4f46e5 !important;
+  color: #37352f !important;
   text-decoration: underline;
+  text-decoration-color: rgba(55, 53, 47, 0.3);
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  text-decoration-color: rgba(55, 53, 47, 0.8);
+}
+
+.prose code {
+  background: rgba(135, 131, 120, 0.08);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  color: #eb5757;
+}
+
+.prose pre {
+  background: #f7f7f5 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+}
+
+.prose blockquote {
+  border-left: 3px solid #e5e7eb;
+  color: #6b7280 !important;
+  font-style: normal;
+}
+
+/* 선택 텍스트 색상 */
+::selection {
+  background: rgba(99, 102, 241, 0.15);
 }
