@@ -139,3 +139,39 @@
 | 2026-04-12 | 전면 리디자인: Notion 스타일 사이드바, 워크스페이스 드롭다운 팝오버, glassmorphism 헤더 |
 | 2026-04-12 | 이모지 → 컬러 이니셜 아이콘으로 변경 |
 | 2026-04-12 | /workspaces 전용 페이지 (카드형 그리드, 메모/폴더 카운트) 추가 |
+
+---
+
+## 사용자 직접 수정 기능 — WYSIWYG 에디터 + 위젯 관리 (2026-04-12 완료)
+
+- [x] TipTap WYSIWYG 에디터 설치 및 RichTextEditor 컴포넌트 생성
+- [x] 서식 툴바 구현 (볼드, 이탤릭, 헤딩, 리스트, 체크리스트, 링크, 코드, 인용, 구분선)
+- [x] AI 마크다운 결과 → TipTap 에디터에 로드 (tiptap-markdown)
+- [x] 에디터 편집 내용 → 마크다운으로 변환하여 store 저장 (debounce 적용)
+- [x] 위젯 관리 UI (추가/편집/삭제 버튼, 20종 위젯 폼)
+- [x] 위젯 추가 패널 (타입 선택 그리드 + 데이터 입력 폼 + 라이브 프리뷰)
+- [x] page.tsx 통합 — textarea 제거, WYSIWYG 에디터가 기본 입력
+- [x] 서식 툴바 포커스 시 표시 + 커스텀 툴팁
+- [x] TipTap 커스텀 노드로 위젯 본문 내 임베딩 (WidgetBlock)
+- [x] 위젯 드래그 앤 드롭 (drag handle + draggable atom node)
+- [x] 위젯 자동저장 (편집 모달 없이 실시간 반영)
+- [x] AI 변환 시 위젯 인라인 배치 (afterSection 매칭 + 균등 분배)
+- [x] 에디터 너비 리사이즈 가능
+- [x] editorJson 기반 문서 상태 저장/복원
+- [x] 모바일 대응 (툴바 반응형)
+
+### 진행 로그
+| 시간 | 작업 내용 |
+|------|----------|
+| 2026-04-12 | TipTap + tiptap-markdown 의존성 설치 |
+| 2026-04-12 | RichTextEditor, WidgetManager, TipTap CSS 생성 |
+| 2026-04-12 | ResultView 통합, page.tsx 통합 (handleResultChange + debounce) |
+| 2026-04-12 | SSR hydration 수정 (immediatelyRender: false) |
+| 2026-04-12 | 툴바 포커스 토글, onMouseDown+preventDefault, onTransaction 강제 리렌더 |
+| 2026-04-12 | lastEmittedRef 패턴으로 에디터 리셋 방지 |
+| 2026-04-12 | textarea 제거, 통합 WYSIWYG 뷰로 전환 |
+| 2026-04-12 | 위젯 자동저장 (TypeSelectorModal + WidgetEditModal 분리) |
+| 2026-04-12 | TipTap WidgetBlock 커스텀 노드 — 본문 내 위젯 임베딩 |
+| 2026-04-12 | AI 버튼 헤더 이동, 위젯 not-prose 격리, 커스텀 툴팁 |
+| 2026-04-12 | 위젯 미리보기 상하 레이아웃, 에디터 리사이즈, editorJson 저장/복원 |
+| 2026-04-12 | AI 변환 시 afterSection 기반 위젯 인라인 배치 |
