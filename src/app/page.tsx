@@ -15,6 +15,7 @@ import {
   moveFolder,
   migrateFromHistory,
   type MemoDocument,
+  type TransformResult,
   type Workspace,
   getWorkspaces,
   createWorkspace,
@@ -26,15 +27,13 @@ import {
 } from "@/lib/store";
 
 export default function Home() {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Selected memo
   const [selectedDoc, setSelectedDoc] = useState<MemoDocument | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [newMemoId, setNewMemoId] = useState<string | null>(null);
 
   // Input state
-  const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -74,7 +73,6 @@ export default function Home() {
     setActiveWorkspaceId(ws.id);
     setActiveWsId(ws.id);
     setSelectedDoc(null);
-    setIsEditing(false);
     refresh();
   }
 
@@ -110,8 +108,6 @@ export default function Home() {
     refresh();
     setSelectedDoc(doc);
     setNewMemoId(doc.id);
-    setIsEditing(true);
-    setText("");
     setError("");
     setSidebarOpen(false);
   }
@@ -122,27 +118,18 @@ export default function Home() {
     refresh();
     setSelectedDoc(doc);
     setNewMemoId(doc.id);
-    setIsEditing(true);
-    setText("");
     setError("");
     setSidebarOpen(false);
   }
 
   function handleAutoRenameDone() {
     setNewMemoId(null);
-    setTimeout(() => textareaRef.current?.focus(), 50);
   }
 
   function handleSelectDocument(doc: MemoDocument) {
     setSelectedDoc(doc);
-    const hasResult = !!doc.result?.markdown;
-    setIsEditing(!hasResult);
-    setText(doc.inputText);
     setError("");
     setSidebarOpen(false);
-    if (!hasResult) {
-      setTimeout(() => textareaRef.current?.focus(), 50);
-    }
   }
 
   function handleSelectFolder(_folderId: string | null) {
@@ -150,7 +137,8 @@ export default function Home() {
   }
 
   async function handleTransform() {
-    if (!text.trim() || !selectedDoc) return;
+    const currentText = selectedDoc?.result?.markdown?.trim();
+    if (!currentText || !selectedDoc) return;
     setLoading(true);
     setError("");
 
@@ -158,7 +146,7 @@ export default function Home() {
       const res = await fetch("/api/transform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: currentText }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -167,15 +155,14 @@ export default function Home() {
       }
 
       const updates: Partial<Pick<MemoDocument, "title" | "inputText" | "result">> = {
-        inputText: text,
+        inputText: currentText,
         result: data,
       };
       if (selectedDoc.title === "제목 없음") {
-        updates.title = text.trim().slice(0, 30) || "제목 없음";
+        updates.title = currentText.slice(0, 30) || "제목 없음";
       }
       updateDocument(selectedDoc.id, updates);
       setSelectedDoc({ ...selectedDoc, ...updates } as MemoDocument);
-      setIsEditing(false);
       refresh();
     } catch {
       setError("서버와 연결할 수 없습니다.");
@@ -184,11 +171,13 @@ export default function Home() {
     }
   }
 
-  function handleEdit() {
+  function handleResultChange(newResult: TransformResult) {
     if (!selectedDoc) return;
-    setText(selectedDoc.inputText);
-    setIsEditing(true);
-    setTimeout(() => textareaRef.current?.focus(), 50);
+    setSelectedDoc({ ...selectedDoc, result: newResult } as MemoDocument);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      updateDocument(selectedDoc.id, { result: newResult });
+    }, 500);
   }
 
   // ─── CRUD handlers ────────────────────────────────────────
@@ -221,7 +210,6 @@ export default function Home() {
     deleteDocument(id);
     if (selectedDoc?.id === id) {
       setSelectedDoc(null);
-      setIsEditing(false);
     }
     refresh();
   }
@@ -307,12 +295,33 @@ export default function Home() {
               {selectedDoc ? selectedDoc.title : "RealMemo"}
             </span>
           </div>
-          <a
-            href="/demo"
-            className="flex-shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            위젯 데모
-          </a>
+          <div className="flex items-center gap-3">
+            {selectedDoc && (
+              <button
+                onClick={handleTransform}
+                disabled={loading || !selectedDoc.result?.markdown?.trim()}
+                className="flex-shrink-0 flex items-center gap-1.5 rounded-full bg-indigo-50 px-3.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? (
+                  <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                )}
+                AI로 정리하기
+              </button>
+            )}
+            <a
+              href="/demo"
+              className="flex-shrink-0 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              위젯 데모
+            </a>
+          </div>
         </header>
 
         {/* Content */}
@@ -339,51 +348,14 @@ export default function Home() {
                 새 메모 만들기
               </button>
             </div>
-          ) : isEditing ? (
-            /* Editing view */
-            <div className="mx-auto max-w-3xl py-8 px-6">
-              <h1 className="mb-8 text-2xl font-semibold text-gray-900 tracking-tight">
+          ) : (
+            /* Unified editor view — always WYSIWYG */
+            <div className="mx-auto py-8 px-6" style={{ width: "48rem", maxWidth: "100%", minWidth: "20rem", resize: "horizontal", overflow: "hidden" }}>
+              <h1 className="mb-6 text-2xl font-semibold text-gray-900 tracking-tight">
                 {selectedDoc.title}
               </h1>
 
-              <textarea
-                ref={textareaRef}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="정리하고 싶은 텍스트를 자유롭게 입력하세요..."
-                className="w-full min-h-[400px] rounded-xl border border-black/[0.08] bg-white px-5 py-4 text-[15px] text-gray-900 placeholder:text-gray-300 focus:border-gray-300 focus:ring-0 focus:outline-none resize-y leading-relaxed transition-colors"
-              />
-
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleTransform}
-                    disabled={loading || !text.trim()}
-                    className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        변환 중...
-                      </span>
-                    ) : "변환하기"}
-                  </button>
-                  {selectedDoc.result?.markdown && (
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="rounded-lg px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      결과 보기
-                    </button>
-                  )}
-                </div>
-                {text.trim() && (
-                  <span className="text-xs text-gray-400">{text.length.toLocaleString()}자</span>
-                )}
-              </div>
+              <ResultView key={selectedDoc.id} result={selectedDoc.result} onResultChange={handleResultChange} />
 
               {error && (
                 <div className="mt-4 rounded-xl border border-red-100 bg-red-50/50 px-4 py-3 text-sm text-red-600">
@@ -391,29 +363,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-          ) : (
-            /* Result view */
-            selectedDoc.result?.markdown && (
-              <div className="mx-auto max-w-3xl py-8 px-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
-                    {selectedDoc.title}
-                  </h1>
-                  <button
-                    onClick={handleEdit}
-                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
-                    편집
-                  </button>
-                </div>
-                <div className="rounded-xl border border-black/[0.06] bg-white p-8">
-                  <ResultView result={selectedDoc.result} />
-                </div>
-              </div>
-            )
           )}
         </main>
       </div>

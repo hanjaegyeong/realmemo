@@ -15,6 +15,7 @@ const SYSTEM_PROMPT = `당신은 날것의 텍스트를 **구조화된 문서 + 
     {
       "type": "table | timeline | checklist | summary_card | chart | mindmap | radial_map | kanban | progress | quote | pros_cons | accordion | link_list | gallery | rating | process | metric | swot | comparison | poll",
       "title": "string — 위젯 제목",
+      "afterSection": "string — 이 위젯이 배치될 마크다운 섹션 제목 (## 헤딩 텍스트). 해당 섹션 바로 아래에 위젯이 삽입됨",
       "data": { ... }
     }
   ]
@@ -86,11 +87,13 @@ const SYSTEM_PROMPT = `당신은 날것의 텍스트를 **구조화된 문서 + 
     {
       "type": "table",
       "title": "Q2 마케팅 예산 배분",
+      "afterSection": "Q2 마케팅 예산",
       "data": { "headers": ["구분", "금액", "비율"], "rows": [["디지털", "3,000만 원", "60%"], ["오프라인", "2,000만 원", "40%"]] }
     },
     {
       "type": "checklist",
       "title": "액션 아이템",
+      "afterSection": "온보딩 개선",
       "data": { "items": ["소셜 로그인 기술 검토 및 공수 산정", "마케팅 세부 집행 계획 수립", "멘토링 가이드라인 초안 작성"] }
     }
   ]

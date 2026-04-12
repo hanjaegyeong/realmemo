@@ -2,6 +2,17 @@ import { HistoryEntry } from "./history";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+export interface ContentBlock {
+  id: string;
+  type: "text" | "widget";
+  content?: string;
+  widget?: {
+    type: string;
+    title: string;
+    data: Record<string, unknown>;
+  };
+}
+
 export interface TransformResult {
   markdown: string;
   diagrams?: string[];
@@ -10,6 +21,8 @@ export interface TransformResult {
     title: string;
     data: Record<string, unknown>;
   }>;
+  blocks?: ContentBlock[];
+  editorJson?: Record<string, unknown>;
 }
 
 export interface Workspace {
